@@ -1,6 +1,6 @@
 # gcp-api-client
 
-REST API client for [Google Cloud Platform](https://cloud.google.com/products/) services, not a replacement for the [client libraries](https://cloud.google.com/nodejs/docs/reference/libraries) available from Google.
+Simple REST API client for [Google Cloud Platform](https://cloud.google.com/products/) services, not a replacement for the [client libraries](https://cloud.google.com/nodejs/docs/reference/libraries) available from Google.
 
 This package merely exposes some of the functionalities of the    [@google-cloud/common](https://www.npmjs.com/package/@google-cloud/common) package to facilitate the use for simple API requests.
 
@@ -87,15 +87,15 @@ If present, `options` must be an object with the following properties:
 | Property | Description |
 |:---------|:------------|
 | `query`  | OPTIONAL - Object; if present, a query string is generated with the specified keys and values |
-| `json`   | OPTIONAL - Object; object to be serialized into JSON body |
-| `form`   | OPTIONAL - Object; object to be serialized into URL-encoded body |
-| `text`   | OPTIONAL - String; string to be used as request body |
+| `json`   | OPTIONAL - Object to be serialized into JSON body |
+| `form`   | OPTIONAL - Object to be serialized into URL-encoded body |
+| `text`   | OPTIONAL - String to be used as request body |
 | `file`   | OPTIONAL - String; path to the file to be uploaded
 | `type`   | OPTIONAL - String; relevant only if `file` is present; MIME type of the file to be uploaded |
 
 The following combinations of `json`, `form`, `text` and `file` are supported:
 
-| `json` | `form` | `text` | `file` |
+| `json` | `form` | `text` | `file` |           |
 |:------:|:------:|:------:|:------:|:----------|
 | x      |        |        |        | The `content-type` header is set to `application/json` and `json` is used as body after serialization |
 |        | x      |        |        | The `content-type` header is set to `application/x-www-form-urlencoded` and `form` is used as body after serialization |
@@ -133,7 +133,7 @@ const client =  apiClient({
 });
 ```
 
-The specified parameters are automatically inserted in the `path` value when the client is used to initiate requests. Double braces are used to mark the parameters:
+The specified parameters are automatically inserted in the request path when the client is used to initiate a request. Double braces are used to mark the parameters:
 
 ```javascript
 client.get('/storage/v1/b/{{bucket}}/o').then(processResponse);
@@ -145,4 +145,4 @@ The above request is equivalent to:
 client.get('/storage/v1/b/my-bucket/o').then(processResponse);
 ```
 
-The `{{projectId}}` parameter has a special treatment. It can be used in `path` even if not specified for the client. When this is the case, `{{projectId}}` is replaced with the name of the project for which the client has obtained its credentials.
+The `{{projectId}}` parameter has a special treatment. It can be used in the request path even if not specified when the client is instantiated. When this is the case, `{{projectId}}` is replaced with the name of the project for which the client has obtained its credentials.

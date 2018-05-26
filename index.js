@@ -2,7 +2,7 @@ const fs = require('fs');
 const Service = require('@google-cloud/common').Service;
 
 const DEFAULT_BASE_URL = 'https://www.googleapis.com';
-const DEFAULT_SCOPES = [ 'https://www.googleapis.com/auth/cloud-platform' ];
+const DEFAULT_SCOPES = 'https://www.googleapis.com/auth/cloud-platform';
 
 module.exports = function(options = {}) {
   return new GenericClient(options);

@@ -7,6 +7,9 @@
     "type": "git",
     "url": "https://github.com/teifip/gcp-api-client.git"
   },
+  "engines": {
+    "node": ">=4.0.0"
+  },
   "keywords": [
     "API",
     "client",
@@ -14,9 +17,6 @@
     "GCP",
     "Google Cloud Platform"
   ],
-  "engines": {
-    "node": ">=4.0.0"
-  },
   "bugs": {
     "url": "https://github.com/teifip/gcp-api-client/issues"
   },
