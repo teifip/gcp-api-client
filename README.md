@@ -1,8 +1,10 @@
 # gcp-api-client
 
-Simple REST API client for [Google Cloud Platform](https://cloud.google.com/products/) services, not a replacement for the [client libraries](https://cloud.google.com/nodejs/docs/reference/libraries) available from Google.
+REST API client for [Google Cloud Platform](https://cloud.google.com/products/) services. Not a replacement for the [client libraries](https://cloud.google.com/nodejs/docs/reference/libraries) available from Google.
 
-This package merely exposes some of the functionalities of the    [@google-cloud/common](https://www.npmjs.com/package/@google-cloud/common) package to facilitate the use for simple API requests.
+This package merely exposes some of the functionalities of the [@google-cloud/common](https://www.npmjs.com/package/@google-cloud/common) package to facilitate the use for simple API requests.
+
+> If you want to use this client from a local shell, you must have the [Google Cloud SDK](https://cloud.google.com/sdk/docs/quickstarts) installed to enable authentication. Refer to the [gcloud auth](https://cloud.google.com/sdk/gcloud/reference/auth/) documentation for info on how to managed OAuth2 credentials.
 
 ### Overview
 
@@ -42,8 +44,7 @@ async function makeRequests() {
   let data = {
     query: { uploadType: 'multipart' },
     json: { name: 'my-object' },
-    file: './pic10.jpg',
-    type: 'image/jpeg'
+    file: './picture.jpg'
   };
 
   let response2 = await client.post('/upload/storage/v1/b/my-bucket/o', data);
@@ -72,38 +73,42 @@ If present, `options` must be an object with following properties:
 |:-------------|:------------|
 | `baseUrl`    | OPTIONAL - String; default value is `https://www.googleapis.com` |
 | `scopes`     | OPTIONAL - String or array of strings; must be appropriate for the service endpoint that is intended to be called; default value is `https://www.googleapis.com/auth/cloud-platform` |
-| `pathParams` | OPTIONAL - Object; each key/value pair represents a path parameter and its replacement string (see details [below](#Use-of-path-parameters)) |
+| `pathParams` | OPTIONAL - Object; each key/value pair represents a path parameter and its replacement string (see details below) |
 
 Once the API client has been instantiated, requests are made through the following methods:
 
 **client.post(path[, options][, callback])**
 
-Initiates a POST request. `path` specifies the request path (relative to the `baseUrl` configured for the client). Must be a string starting with `/`. May contain parameters marked with double braces (see details [below](#Use-of-path-parameters)).
+Initiates a POST request. `path` specifies the request path (relative to the `baseUrl` configured for the client). Must be a string starting with `/`. May contain parameters marked with double braces (see details below).
 
 If present, `callback` must be a function that expects `(error, response)` as input parameters. Otherwise, if `callback` is not present, then `client.post()` returns a promise to resolve `response` or to catch `error`.
 
 If present, `options` must be an object with the following properties:
 
-| Property | Description |
-|:---------|:------------|
-| `query`  | OPTIONAL - Object; if present, a query string is generated with the specified keys and values |
-| `json`   | OPTIONAL - Object to be serialized into JSON body |
-| `form`   | OPTIONAL - Object to be serialized into URL-encoded body |
-| `text`   | OPTIONAL - String to be used as request body |
-| `file`   | OPTIONAL - String; path to the file to be uploaded
-| `type`   | OPTIONAL - String; relevant only if `file` is present; MIME type of the file to be uploaded |
+| Property  | Description |
+|:----------|:------------|
+| `query`   | OPTIONAL - Object; if present, a query string is generated with the specified keys and values |
+| `json`    | OPTIONAL - Object to be serialized into JSON body |
+| `form`    | OPTIONAL - Object to be serialized into URL-encoded body |
+| `text`    | OPTIONAL - String to be used as request body |
+| `file`    | OPTIONAL - String; path to the file to be uploaded
+| `type`    | OPTIONAL - String; relevant only if `file` is present; MIME type of the file to be uploaded; may be omitted if `file` includes an extension that indicates the actual MIME type |
+| `headers` | OPTIONAL - Object; headers to be added to the request; there is no need to specify the `accept` header or the `content-type` header since they are automatically generated |
 
 The following combinations of `json`, `form`, `text` and `file` are supported:
 
 | `json` | `form` | `text` | `file` |           |
 |:------:|:------:|:------:|:------:|:----------|
-| x      |        |        |        | The `content-type` header is set to `application/json` and `json` is used as body after serialization |
-|        | x      |        |        | The `content-type` header is set to `application/x-www-form-urlencoded` and `form` is used as body after serialization |
-|        |        | x      |        | The `content-type` header is set to `text/plain` and `text` is used as body |
+| x      |        |        |        | The `content-type` header is set to `application/json` and the `json` object is used as body after serialization |
+|        | x      |        |        | The `content-type` header is set to `application/x-www-form-urlencoded` and the `form` object is used as body after serialization |
+|        |        | x      |        | The `content-type` header is set to `text/plain` and the `text` string is used as body |
+|        |        |        | x      | The `content-type` header is set to the value specified by `type` or derived from the extension of `file` if `type` is omitted; the content of `file` is streamed as body |
 | x      |        | x      |        | The `content-type` header is set to `multipart/related`; the first part has `application/json` body; the second part has `text/plain` body
-| x      |        |        | x      | The `content-type` header is set to `multipart/related`; the first part has `application/json` body; the second part has content type specified by the `type` value |
+| x      |        |        | x      | The `content-type` header is set to `multipart/related`; the first part has `application/json` body; the second part has content type set to the value specified by `type` or derived from the extension of `file` if `type` is omitted |
 
 `response` is an object obtained by parsing the JSON response returned by the server.
+
+> Only API calls that return JSON body are supported.
 
 **client.get(path[, options][, callback])**
 
@@ -145,4 +150,8 @@ The above request is equivalent to:
 client.get('/storage/v1/b/my-bucket/o').then(processResponse);
 ```
 
-The `{{projectId}}` parameter has a special treatment. It can be used in the request path even if not specified when the client is instantiated. When this is the case, `{{projectId}}` is replaced with the name of the project for which the client has obtained its credentials.
+The `{{projectId}}` parameter has a special treatment. It can be used in the request path even if not specified when the client is instantiated. When this is the case, `{{projectId}}` is replaced with the default project for the environment.
+
+### Limitations
+
+Some of the error responses returned by the [@google-cloud/common](https://www.npmjs.com/package/@google-cloud/common) package are too succinct to be useful. For example, the absence of a mandatory request parameter may result in an error response with just `Required` as error message.

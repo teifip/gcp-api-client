@@ -1,4 +1,5 @@
 const fs = require('fs');
+const mime = require('mime-types');
 const Service = require('@google-cloud/common').Service;
 
 const DEFAULT_BASE_URL = 'https://www.googleapis.com';
@@ -46,6 +47,9 @@ function makeRequest(method, path, ...rest) {
   let options = {};
   let callback = null;
 
+  if (rest.length > 0 && rest[rest.length - 1] === undefined) {
+    rest.pop();
+  }
   if (rest.length > 0 && rest[0].constructor === Object) {
     options = rest.shift();
   }
@@ -60,10 +64,25 @@ function makeRequest(method, path, ...rest) {
     path = path.replace(new RegExp(`{{${param}}}`, 'g'), this.params[param]);
   }
 
-  let requestOptions = { method: method, uri: path };
+  let requestOptions = { method: method, uri: path, headers: {} };
 
   if (options.query) {
     requestOptions.qs = options.query;
+  }
+
+  if (options.file) {
+    try {
+      fs.accessSync(options.file);
+    } catch (error) {
+      if (callback) return callback(error);
+      return new Promise((resolve, reject) => reject(error));
+    }
+    options.type = options.type || mime.lookup(options.file);
+    if (!options.type) {
+      let error = new Error('Cannot determine file type');
+      if (callback) return callback(error);
+      return new Promise((resolve, reject) => reject(error));
+    }
   }
 
   if (options.json && options.text) {
@@ -93,13 +112,19 @@ function makeRequest(method, path, ...rest) {
   } else if (options.json) {
     requestOptions.json = options.json;
 
-  } else if (options.form) {
-    requestOptions.form = options.form;
-
   } else if (options.text) {
     requestOptions.body = options.text;
     requestOptions.headers = { 'content-type': 'text/plain' };
+
+  } else if (options.file) {
+    requestOptions.body = fs.createReadStream(options.file);
+    requestOptions.headers = { 'content-type': options.type };
+
+  } else if (options.form) {
+    requestOptions.form = options.form;
   }
+
+  Object.assign(requestOptions.headers, options.headers);
 
   if (callback) {
     this.request(requestOptions, callback);
