@@ -154,4 +154,4 @@ The `{{projectId}}` parameter has a special treatment. It can be used in the req
 
 ### Limitations
 
-Some of the error responses returned by the [@google-cloud/common](https://www.npmjs.com/package/@google-cloud/common) package are too succinct to be useful. For example, the absence of a mandatory request parameter may result in an error response with just `Required` as error message.
+Some of the error messages returned by the [@google-cloud/common](https://www.npmjs.com/package/@google-cloud/common) package are too succinct to be useful. For example, the absence of a mandatory request parameter may result in an error with just `Required` as message. In those cases, you may want to inspect the `error.response` object that contains the complete response returned by the server.
