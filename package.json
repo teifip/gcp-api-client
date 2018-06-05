@@ -1,6 +1,6 @@
 {
   "name": "gcp-api-client",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "REST API client for Google Cloud Platform services",
   "main": "index.js",
   "repository": {
