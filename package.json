@@ -1,14 +1,11 @@
 {
   "name": "gcp-api-client",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "REST API client for Google Cloud Platform services",
   "main": "index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/teifip/gcp-api-client.git"
-  },
-  "engines": {
-    "node": ">=4.0.0"
   },
   "keywords": [
     "API",
@@ -24,7 +21,7 @@
   "author": "Paolo Fiorini <teifip@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@google-cloud/common": "^0.18.9",
-    "mime-types": "^2.1.18"
+    "@google-cloud/common": "^2.0.0",
+    "mime-types": "^2.1.24"
   }
 }
